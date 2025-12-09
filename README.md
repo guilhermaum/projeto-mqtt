@@ -34,6 +34,7 @@ Formada por microsserviços desenvolvidos com Python.
 
 O projeto utiliza:
 - Java JDK 21.1
+- Python 3.11.9
 - Apache Maven 3.9.11 como ferramenta para gerenciar as dependências
 - MQTTX 1.12 como broker gratuito da EMQX
 - Eclipse Paho MQTT para comunicação MQTT
