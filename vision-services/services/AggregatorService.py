@@ -14,6 +14,8 @@ class AggregatorService:
         self.client_id = client_id
         self.last_values = []
 
+        self.buffers = {}
+
         self.client = mqtt.Client(client_id)
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
@@ -33,28 +35,33 @@ class AggregatorService:
 
         value = payload.get("value")
         sensor_type = payload.get("type")
+        sensor_id = payload.get("id")
 
-        if value is None:
-            print(f"⚠️ [{self.client_id}] Payload ignorado (sem 'value'):", payload)
+        if value is None or sensor_id is None:
+            print(f"⚠️ [{self.client_id}] Payload ignorado (faltando 'value' ou 'id'):", payload)
             return
 
-        self.last_values.append(value)
+        if sensor_id not in self.buffers:
+            self.buffers[sensor_id] = []
 
-        if len(self.last_values) > 5:
-            self.last_values.pop(0)
+        buffer = self.buffers[sensor_id]
+        buffer.append(value)
 
-        if len(self.last_values) == 5:
-            avg = sum(self.last_values) / 5
+        if len(buffer) == 5:
+            avg = sum(buffer) / 5
 
             out_payload = {
+                "id": sensor_id,
                 "type": sensor_type,
                 "avg": avg,
                 "timestamp": int(time.time() * 1000)
             }
 
-            print(f"📤 [{self.client_id}] Publicando média:", out_payload)
+            print(f"📤 [{self.client_id}] Publicando média do sensor [{sensor_id}]:", out_payload)
             self.publisher.publish(out_payload)
-            self.last_values = []
+
+            self.buffers[sensor_id] = []
+
 
     def start_in_thread(self):
         t = threading.Thread(target=self.start)
