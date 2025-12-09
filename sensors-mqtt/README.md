@@ -28,7 +28,7 @@ Além disso, o `src/main/App.java` realiza as execuções de todos os programas 
 
 ## Arquitetura do consumidor ##
 
-(Em desenvolvimento)
+Formada por microsserviços desenvolvidos com Python.
 
 ## Ferramentas utilizadas ##
 
