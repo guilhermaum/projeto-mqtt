@@ -8,14 +8,21 @@ from topics.topics import (
 )
 
 def main():
-    BROKER = "broker.emqx.io"
-    PORT = 1883
+    BROKER = "z2a78b18.ala.eu-central-1.emqxsl.com"
+    PORT = 8883
+    USERNAME = "guilhermaum"
+    PASSWORD = "12345678"
+    CA_CERT = "mqtt/emqxsl-ca.crt"
 
     services = [
-        AggregatorService(BROKER, PORT, SENSOR_UMIDADE, MEDIA_UMIDADE, "agregador-umidade"),
-        AggregatorService(BROKER, PORT, SENSOR_TEMPERATURA, MEDIA_TEMPERATURA, "agregador-temperatura"),
-        AggregatorService(BROKER, PORT, SENSOR_LUMINOSIDADE, MEDIA_LUMINOSIDADE, "agregador-luminosidade"),
-        AggregatorService(BROKER, PORT, SENSOR_PH, MEDIA_PH, "agregador-ph"),
+        AggregatorService(BROKER, PORT, SENSOR_UMIDADE, MEDIA_UMIDADE, "agregador-umidade",
+                          USERNAME, PASSWORD, CA_CERT),
+        AggregatorService(BROKER, PORT, SENSOR_TEMPERATURA, MEDIA_TEMPERATURA, "agregador-temperatura",
+                          USERNAME, PASSWORD, CA_CERT),
+        AggregatorService(BROKER, PORT, SENSOR_LUMINOSIDADE, MEDIA_LUMINOSIDADE, "agregador-luminosidade",
+                          USERNAME, PASSWORD, CA_CERT),
+        AggregatorService(BROKER, PORT, SENSOR_PH, MEDIA_PH, "agregador-ph",
+                          USERNAME, PASSWORD, CA_CERT),
     ]
 
     for service in services:

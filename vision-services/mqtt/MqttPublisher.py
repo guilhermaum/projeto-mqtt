@@ -12,4 +12,4 @@ class MqttPublisher:
             payload = json.dumps(payload)
 
         payload_bytes = payload.encode("utf-8")
-        self.client.publish(self.output_topic, payload_bytes, qos=1)
+        self.client.publish(self.output_topic, payload_bytes, qos=1, retain=True)

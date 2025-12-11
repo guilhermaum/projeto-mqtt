@@ -1,25 +1,37 @@
 import json
-import paho.mqtt.client as mqtt
 from mqtt.MqttPublisher import MqttPublisher
+import paho.mqtt.client as mqtt
 
-BROKER = "broker.emqx.io"
-PORT = 1883
+BROKER = "z2a78b18.ala.eu-central-1.emqxsl.com"
+PORT = 8883
+CA_CERT = "mqtt/emqxsl-ca.crt"
+USERNAME = "guilhermaum"
+PASSWORD = "12345678"
 
 class BaseService:
-    def __init__(self, client_id, input_topic, output_topic):
+    def __init__(self, client_id, input_topic, output_topic, ca_cert):
         self.client = mqtt.Client(client_id)
+
+        # Login
+        self.client.username_pw_set(USERNAME, PASSWORD)
+
+        # TLS
+        self.client.tls_set(ca_cert)
+        self.client.tls_insecure_set(False)
+
         self.publisher = MqttPublisher(self.client, output_topic)
 
         self.input_topic = input_topic
         self.output_topic = output_topic
         self.client_id = client_id
 
-        self.buffers = {}  # <--- ARMAZENA OS VALORES POR ID
+        self.buffers = {}  # Armazena valores por sensor ID
 
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
 
     def start(self):
+        print(f"🔌 Iniciando {self.client_id}...")
         self.client.connect(BROKER, PORT)
         self.client.loop_forever()
 
@@ -27,12 +39,14 @@ class BaseService:
         if sensor_id not in self.buffers:
             self.buffers[sensor_id] = []
 
+
 class TemperaturaService(BaseService):
-    def __init__(self):
+    def __init__(self, car_cert):
         super().__init__(
             client_id="alerta-temperatura",
             input_topic="estufa/visao/temperatura",
-            output_topic="estufa/alerta/temperatura"
+            output_topic="estufa/alerta/temperatura",
+            ca_cert=car_cert
         )
 
     def on_connect(self, c, u, f, rc):
@@ -59,12 +73,14 @@ class TemperaturaService(BaseService):
             self.publisher.publish(alerta)
             print("[Temp] ALERTA enviado:", alerta)
 
+
 class UmidadeService(BaseService):
-    def __init__(self):
+    def __init__(self, ca_cert):
         super().__init__(
             client_id="alerta-umidade",
             input_topic="estufa/visao/umidade",
-            output_topic="estufa/alerta/umidade"
+            output_topic="estufa/alerta/umidade",
+            ca_cert=ca_cert
         )
 
     def on_connect(self, c, u, f, rc):
@@ -93,13 +109,14 @@ class UmidadeService(BaseService):
             print("[Umid] ALERTA enviado:", alerta)
 
 class LuminosidadeService(BaseService):
-    def __init__(self):
+    def __init__(self, ca_cert):
         super().__init__(
             client_id="alerta-luz",
             input_topic="estufa/visao/iluminacao",
-            output_topic="estufa/alerta/iluminacao"
+            output_topic="estufa/alerta/iluminacao",
+            ca_cert=ca_cert
         )
-        self.buffers = {}  # cada sensor ID terá 12 valores
+        self.buffers = {}
 
     def on_connect(self, c, u, f, rc):
         print("[Luz] Conectado")
@@ -107,7 +124,6 @@ class LuminosidadeService(BaseService):
 
     def on_message(self, c, u, msg):
         payload = json.loads(msg.payload.decode())
-
         sensor_id = payload.get("id")
         avg = payload.get("avg")
 
@@ -133,14 +149,16 @@ class LuminosidadeService(BaseService):
 
             self.buffers[sensor_id] = []
 
+
 class PhService(BaseService):
-    def __init__(self):
+    def __init__(self, ca_cert):
         super().__init__(
             client_id="alerta-ph",
             input_topic="estufa/visao/ph",
-            output_topic="estufa/alerta/ph"
+            output_topic="estufa/alerta/ph",
+            ca_cert=ca_cert
         )
-        self.buffers = {}  # 12 leituras por sensor
+        self.buffers = {}
 
     def classificar(self, ph):
         if ph < 5.5:
@@ -158,7 +176,6 @@ class PhService(BaseService):
 
     def on_message(self, c, u, msg):
         payload = json.loads(msg.payload.decode())
-
         sensor_id = payload.get("id")
         avg = payload.get("avg")
 

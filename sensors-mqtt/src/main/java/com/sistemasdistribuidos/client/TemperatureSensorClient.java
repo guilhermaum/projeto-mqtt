@@ -1,25 +1,39 @@
 package com.sistemasdistribuidos.client;
 
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import com.google.gson.Gson;
+import javax.net.ssl.SSLContext;
 
+import org.eclipse.paho.client.mqttv3.MqttClient;
+
+import com.google.gson.Gson;
 import com.sistemasdistribuidos.controller.TemperatureController;
-import com.sistemasdistribuidos.model.SensorData;
 import com.sistemasdistribuidos.mqtt.MqttPublisher;
+import com.sistemasdistribuidos.mqtt.MqttConnector;
 import com.sistemasdistribuidos.sensors.TemperatureSensor;
+import com.sistemasdistribuidos.mqtt.TLSUtil;
 
 public class TemperatureSensorClient {
 
     public static void main(String[] args) {
 
-        String broker = "tcp://broker.emqx.io:1883";
+        String broker = "ssl://z2a78b18.ala.eu-central-1.emqxsl.com:8883";
         String clientId = "thermometer-1";
         String topic = "estufa/sensores/temperatura";
+        String username = "guilhermaum";
+        String password = "12345678";
 
         try {
-            MqttClient client = new MqttClient(broker, clientId);
-            client.connect();
-            System.out.println("Conectado ao broker");
+
+            SSLContext sslContext = TLSUtil.createSSLContext("emqxsl-ca.crt");
+
+            MqttClient client = MqttConnector.connect(
+                    broker,
+                    clientId,
+                    username,
+                    password,
+                    sslContext
+            );
+
+            System.out.println("Conectado ao broker via TLS!");
 
             MqttPublisher publisher = new MqttPublisher(client);
             Gson gson = new Gson();
@@ -30,13 +44,12 @@ public class TemperatureSensorClient {
 
             while (true) {
 
-                SensorData data = controller.readData();
-                String json = gson.toJson(data);
+                String json = gson.toJson(controller.readData());
 
                 publisher.publish(topic, json);
                 System.out.println("Publicado [Temperatura] -> " + json);
 
-                Thread.sleep(6000); // 60 segundos
+                Thread.sleep(6000);
             }
 
         } catch (Exception e) {
