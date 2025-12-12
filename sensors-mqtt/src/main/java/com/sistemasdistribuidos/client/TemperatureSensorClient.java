@@ -1,5 +1,8 @@
 package com.sistemasdistribuidos.client;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.net.ssl.SSLContext;
 
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -8,7 +11,6 @@ import com.google.gson.Gson;
 import com.sistemasdistribuidos.controller.TemperatureController;
 import com.sistemasdistribuidos.mqtt.MqttPublisher;
 import com.sistemasdistribuidos.mqtt.MqttConnector;
-import com.sistemasdistribuidos.sensors.TemperatureSensor;
 import com.sistemasdistribuidos.mqtt.TLSUtil;
 
 public class TemperatureSensorClient {
@@ -38,16 +40,26 @@ public class TemperatureSensorClient {
             MqttPublisher publisher = new MqttPublisher(client);
             Gson gson = new Gson();
 
-            TemperatureSensor sensor = new TemperatureSensor();
-            TemperatureController controller =
-                    new TemperatureController(sensor, clientId);
+            List<TemperatureController> controllers = Arrays.asList(
+                new TemperatureController("thermometer-01"),
+                new TemperatureController("thermometer-02"),
+                new TemperatureController("thermometer-03"),
+                new TemperatureController("thermometer-04"),
+                new TemperatureController("thermometer-05"),
+                new TemperatureController("thermometer-06"),
+                new TemperatureController("thermometer-07"),
+                new TemperatureController("thermometer-08"),
+                new TemperatureController("thermometer-09"),
+                new TemperatureController("thermometer-10")
+            );
 
             while (true) {
 
-                String json = gson.toJson(controller.readData());
-
-                publisher.publish(topic, json);
-                System.out.println("Publicado [Temperatura] -> " + json);
+                for(TemperatureController controller : controllers){
+                    String json = gson.toJson(controller.readData());
+                    publisher.publish(topic, json);
+                    System.out.println("Publicado [Temperatura] -> " + json);
+                }
 
                 Thread.sleep(6000);
             }

@@ -1,5 +1,8 @@
 package com.sistemasdistribuidos.client;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.net.ssl.SSLContext;
 
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -8,7 +11,6 @@ import com.google.gson.Gson;
 import com.sistemasdistribuidos.controller.HumidityController;
 import com.sistemasdistribuidos.mqtt.MqttPublisher;
 import com.sistemasdistribuidos.mqtt.MqttConnector;
-import com.sistemasdistribuidos.sensors.HumiditySensor;
 import com.sistemasdistribuidos.mqtt.TLSUtil;
 
 public class HumiditySensorClient {
@@ -21,14 +23,8 @@ public class HumiditySensorClient {
         String username = "guilhermaum";
         String password = "12345678";
 
-        // Caminho do certificado CA
-        // String caFilePath = "src/main/resources/emqxsl-ca.crt";
-
         try {
-            // Criar contexto SSL
             SSLContext sslContext = TLSUtil.createSSLContext("emqxsl-ca.crt");
-
-            // Conectar usando a classe separada
             MqttClient client = MqttConnector.connect(
                     broker,
                     clientId,
@@ -42,17 +38,26 @@ public class HumiditySensorClient {
             MqttPublisher publisher = new MqttPublisher(client);
             Gson gson = new Gson();
 
-            HumiditySensor sensor = new HumiditySensor();
-            HumidityController controller = new HumidityController(sensor, clientId);
+            List<HumidityController> controllers = Arrays.asList(
+                new HumidityController("humid-01"),
+                new HumidityController("humid-02"),
+                new HumidityController("humid-03"),
+                new HumidityController("humid-04"),
+                new HumidityController("humid-05"),
+                new HumidityController("humid-06"),
+                new HumidityController("humid-07"),
+                new HumidityController("humid-08"),
+                new HumidityController("humid-09"),
+                new HumidityController("humid-10")
+                );
 
             while (true) {
-
-                String json = gson.toJson(controller.readData());
-
-                publisher.publish(topic, json);
-                System.out.println("Publicado [Umidade] -> " + json);
-
-                Thread.sleep(60000);
+                for (HumidityController controller : controllers) {
+                    String json = gson.toJson(controller.readData());
+                    publisher.publish(topic, json);
+                    System.out.println("Publicado [Umidade] -> " + json);
+                }
+                Thread.sleep(6000);
             }
 
         } catch (Exception e) {

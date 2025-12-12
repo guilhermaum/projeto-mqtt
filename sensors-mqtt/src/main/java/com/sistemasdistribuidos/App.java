@@ -1,9 +1,6 @@
 package com.sistemasdistribuidos;
 
-import com.sistemasdistribuidos.client.TemperatureSensorClient;
-import com.sistemasdistribuidos.client.HumiditySensorClient;
-import com.sistemasdistribuidos.client.LuminositySensorClient;
-import com.sistemasdistribuidos.client.PhSensorClient;
+import com.sistemasdistribuidos.client.*;
 
 public class App {
 
@@ -14,7 +11,7 @@ public class App {
             TemperatureSensorClient.main(new String[]{});
         });
 
-        Thread humidityThread = new Thread(() -> {
+         Thread humidityThread = new Thread(() -> {
             HumiditySensorClient.main(new String[]{});
         });
 

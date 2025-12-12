@@ -1,6 +1,9 @@
 package com.sistemasdistribuidos.controller;
 
+import static com.sistemasdistribuidos.utils.FormatData.getDateTimeAsLong;
+
 import com.sistemasdistribuidos.model.SensorData;
+import com.sistemasdistribuidos.sensors.HumiditySensor;
 import com.sistemasdistribuidos.sensors.Sensor;
 
 public class HumidityController {
@@ -8,8 +11,8 @@ public class HumidityController {
     private final Sensor sensor;
     private final String sensorId;
 
-    public HumidityController(Sensor sensor, String sensorId) {
-        this.sensor = sensor;
+    public HumidityController(String sensorId) {
+        this.sensor = new HumiditySensor();
         this.sensorId = sensorId;
     }
 
@@ -19,7 +22,7 @@ public class HumidityController {
             sensorId,
             "humidity",
             value,
-            System.currentTimeMillis()
+            getDateTimeAsLong()
         );
     }
 }

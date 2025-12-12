@@ -1,5 +1,8 @@
 package com.sistemasdistribuidos.client;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.net.ssl.SSLContext;
 
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -8,7 +11,6 @@ import com.google.gson.Gson;
 import com.sistemasdistribuidos.controller.LuminosityController;
 import com.sistemasdistribuidos.mqtt.MqttPublisher;
 import com.sistemasdistribuidos.mqtt.MqttConnector;
-import com.sistemasdistribuidos.sensors.LuminositySensor;
 import com.sistemasdistribuidos.mqtt.TLSUtil;
 
 public class LuminositySensorClient {
@@ -38,17 +40,27 @@ public class LuminositySensorClient {
             MqttPublisher publisher = new MqttPublisher(client);
             Gson gson = new Gson();
 
-            LuminositySensor sensor = new LuminositySensor();
-            LuminosityController controller = new LuminosityController(sensor, clientId);
+            List<LuminosityController> controllers = Arrays.asList(
+                    new LuminosityController("photo-01"),
+                    new LuminosityController("photo-02"),
+                    new LuminosityController("photo-03"),
+                    new LuminosityController("photo-04"),
+                    new LuminosityController("photo-05"),
+                    new LuminosityController("photo-06"),
+                    new LuminosityController("photo-07"),
+                    new LuminosityController("photo-08"),
+                    new LuminosityController("photo-09"),
+                    new LuminosityController("photo-10")
+            );
 
             while (true) {
 
-                String json = gson.toJson(controller.readData());
-
-                publisher.publish(topic, json);
-                System.out.println("Publicado [Luminosidade] -> " + json);
-
-                Thread.sleep(60000);
+                for (LuminosityController controller : controllers) {
+                    String json = gson.toJson(controller.readData());
+                    publisher.publish(topic, json);
+                    System.out.println("Publicado [Luminosidade] -> " + json);
+                }
+                Thread.sleep(6000);
             }
 
         } catch (Exception e) {
