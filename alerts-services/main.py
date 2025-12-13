@@ -15,7 +15,7 @@ def main():
 
     event_bus = EventBus()
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    CA_CERT = os.path.join(BASE_DIR, "mqtt", "emqxsl-ca.crt")
+    CA_CERT = os.path.join(BASE_DIR, "core", "emqxsl-ca.crt")
 
     temperature = TemperatureService(CA_CERT, event_bus)
     humidity = HumidityService(CA_CERT, event_bus)
